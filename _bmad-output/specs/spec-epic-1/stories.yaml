@@ -1,0 +1,12 @@
+- id: "1"
+  title: Triage decision schema
+  description: >-
+    Implement CAP-1: validate triage decisions against triage-decision-schema.md
+    (category, priority, route, one-sentence rationale) with clear errors on
+    invalid input; cover accept and reject cases in tests.
+- id: "2"
+  title: Seed loader
+  description: >-
+    Implement CAP-2: load_seed.py reads seed/tickets.csv and seed/customers.csv
+    into app.db with matching columns; running twice yields the same database
+    and keeps mcp/triage_server.py queries working.
