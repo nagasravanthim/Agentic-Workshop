@@ -10,7 +10,9 @@ Category = Literal["billing", "bug", "access", "performance", "how-to"]
 Priority = Literal["P1", "P2", "P3", "P4"]
 Route = Literal["billing-team", "bug-team", "access-team", "performance-team", "how-to-team"]
 
-_SENTENCE_BREAK = re.compile(r"[.!?]\s+\S")
+# Word-ending punctuation before a following clause (skips short tokens like "Dr.").
+_SENTENCE_BREAK = re.compile(r"(?<=[a-z]{2})[.!?]\s+\S")
+_GLUED_SENTENCE = re.compile(r"[.!?][A-Za-z]")
 
 
 class TriageDecision(BaseModel):
@@ -29,7 +31,11 @@ class TriageDecision(BaseModel):
         text = value.strip()
         if not text:
             raise ValueError("rationale must not be empty")
-        if _SENTENCE_BREAK.search(text):
+        if "\n" in text or "\r" in text:
+            raise ValueError("rationale must be a single line")
+        if not re.search(r"[.!?]\s*$", text):
+            raise ValueError("rationale must end with terminal punctuation")
+        if _SENTENCE_BREAK.search(text) or _GLUED_SENTENCE.search(text):
             raise ValueError("rationale must be a single sentence")
         return text
 

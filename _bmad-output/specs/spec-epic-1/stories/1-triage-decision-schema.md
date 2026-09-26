@@ -66,3 +66,29 @@ context:
 
 **Commands:**
 - `uv run pytest tests/test_schema.py` -- expected: all tests pass with no failures.
+
+### Review Findings
+
+- [x] [Review][Decision] One-sentence detection vs abbreviations — resolved: end-anchored detection with abbreviation-aware `_SENTENCE_BREAK` plus `_GLUED_SENTENCE` for punctuation without whitespace.
+
+- [x] [Review][Patch] Enforce terminal punctuation on rationale [`triage/schema.py:28-34`]
+
+- [x] [Review][Patch] Reject glued multi-sentence rationales [`triage/schema.py:32-33`]
+
+- [x] [Review][Patch] Assert full model equality for JSON input [`tests/test_schema.py:12`]
+
+- [x] [Review][Patch] Assert identifying messages for NOT_OBJECT cases [`tests/test_schema.py:38-41`]
+
+- [x] [Review][Patch] Cover empty-string rationale in BAD_RATIONALE tests [`tests/test_schema.py:21`]
+
+- [x] [Review][Defer] UTF-8 mojibake in new BMad markdown (`ΓÇö` / `nonΓÇô`) [`_bmad-output/specs/spec-epic-1/SPEC.md`] — deferred: documentation encoding only; no runtime impact.
+
+#### Rejected
+
+- **CAP-2 / `load_seed.py` missing from branch** — `false`: Story 1 scope is CAP-1 only; epic success signal is not this PR's acceptance bar.
+- **No test proving mismatched category/route is allowed** — `false`: SPEC assumption explicitly allows independent enum validation.
+- **Embedded newline rationale unchecked** — `false`: `"Line one.\nLine two."` is rejected by `_SENTENCE_BREAK` (verified).
+- **`UserDict` / non-`dict` mappings** — `false`: I/O matrix specifies dict or JSON only.
+- **`pyproject.toml` package layout for `triage`** — `low`: `tests/conftest.py` path bootstrap is documented in the story; not worth packaging churn for this epic.
+- **Parametrize happy path across all enum values** — `low`: one valid example plus enum rejection tests suffice for CAP-1.
+- **Stale Code Map prose in story body** — `low`: metadata drift only; fix is doc edit, not a code defect.

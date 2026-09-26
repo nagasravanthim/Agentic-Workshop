@@ -9,7 +9,15 @@ VALID = {"category": "billing", "priority": "P2", "route": "billing-team", "rati
 
 def test_accepts_a_valid_decision_as_dict_or_json():
     assert validate_decision(VALID) == TriageDecision(**VALID)
-    assert validate_decision(json.dumps(VALID)).priority == "P2"
+    assert validate_decision(json.dumps(VALID)) == TriageDecision(**VALID)
+
+
+def test_accepts_a_rationale_with_a_common_abbreviation():
+    payload = {
+        **VALID,
+        "rationale": "Dr. Smith reported a duplicate charge.",
+    }
+    assert validate_decision(payload) == TriageDecision(**payload)
 
 
 @pytest.mark.parametrize(
@@ -18,7 +26,10 @@ def test_accepts_a_valid_decision_as_dict_or_json():
         ({"category": "sales"}, "category"),
         ({"priority": "P5"}, "priority"),
         ({"route": "finance-team"}, "route"),
+        ({"rationale": ""}, "rationale"),
         ({"rationale": "   "}, "rationale"),
+        ({"rationale": "A double charge is a money problem"}, "rationale"),
+        ({"rationale": "First.Second."}, "rationale"),
         ({"rationale": "First sentence. Second sentence."}, "rationale"),
         ({"extra": "field"}, "extra"),
     ],
@@ -35,9 +46,17 @@ def test_rejects_a_missing_field(field):
         validate_decision(payload)
 
 
-@pytest.mark.parametrize("payload", ["not json", b"\x80\x81", "[1, 2]", "42"])
-def test_rejects_non_objects(payload):
-    with pytest.raises(TriageValidationError):
+@pytest.mark.parametrize(
+    "payload, message",
+    [
+        ("not json", "not valid JSON"),
+        (b"\x80\x81", "not valid JSON"),
+        ("[1, 2]", "JSON object"),
+        ("42", "JSON object"),
+    ],
+)
+def test_rejects_non_objects(payload, message):
+    with pytest.raises(TriageValidationError, match=message):
         validate_decision(payload)
 
 
